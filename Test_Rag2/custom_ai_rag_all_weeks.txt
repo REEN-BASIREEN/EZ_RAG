@@ -1,0 +1,911 @@
+# Custom AI with RAG – Week 1
+
+## คอร์สนี้เรียนอะไร (Course Overview)
+- Prompt Engineering
+- Python สำหรับผู้เริ่มต้น
+- Natural Language Processing (NLP) & Large Language Models (LLMs)
+- Traditional Machine Learning
+- Numpy และ Pandas
+- Retrieval-Augmented Generation (RAG)
+- API
+- VectorDB
+- Embedding Model
+
+---
+
+## แผนการเรียน (Roadmap)
+| สัปดาห์ | หัวข้อหลัก | Hands-on ที่จะได้ทำจริง |
+|---------|------------|-----------------------|
+| 1 | Python Basics | Run, I/O, ตัวแปร, control-flow |
+| 2 | Data Structures & Functions | list/tuple/dict/set, สร้าง function |
+| 3 | Files & Modules | อ่าน-เขียนไฟล์, import, pip |
+| 4 | NLP พื้นฐาน | Tokenization, cleaning |
+| 5 | Embedding Models | สร้าง sentence embedding |
+| 6 | LLMs & Ollama | ดึง LLMs มาลองในเครื่อง |
+| 7 | VectorDB (pgvector) | ติดตั้ง PostgreSQL+pgvector |
+| 8 | Import → VectorDB | สร้าง embedding & insert |
+| 9 | Workshop RAG Chatbot | ตอบ FAQ ร้านค้า |
+| 10 | Workshop Deploy | FastAPI + Docker + LINE OA hook |
+
+> TIP: ไล่เรียนตามลำดับ เพราะแต่ละสัปดาห์ต่อยอดสู่ RAG เต็มรูปแบบ
+
+---
+
+## ทำไมต้อง Python (2025)
+- #1 ภาษายอดนิยมสำหรับ AI (IEEE Spectrum 2025)
+- PyPI > 450,000 packages
+- โค้ดอ่านง่าย ใกล้ pseudocode
+- Community ไทยใหญ่
+- รันได้ทุกที่: PC, Mac, Linux, Raspberry Pi, Colab
+
+---
+
+## เริ่มต้นกับ Python
+
+### Local Environment (แนะนำ)
+- ติดตั้ง Python 3.12+ จาก python.org
+- ใช้ VS Code + Extensions: Python, Pylance, Jupyter
+- ทดสอบใน Terminal:  
+python --version
+code .
+
+### Cloud Environment (ทางเลือก)
+- ใช้ Google Colab
+สมัคร Google, เปิด Notebook, เปลี่ยน runtime เป็น GPU ได้ (ฟรี)
+
+---
+
+## Python Basics – สาระสำคัญ
+
+### ชนิดข้อมูลพื้นฐาน (Built-in Types)
+| ชนิด   | ตัวอย่างโค้ด        | หมายเหตุ |
+|--------|---------------------|-----------|
+| int    | type(7)           | เลขจำนวนเต็ม |
+| float  | 3.14 * 2          | เลขทศนิยม |
+| str    | "AI" + "2025"     | ข้อความ |
+| bool   | 5 > 3             | True/False |
+
+### ตัวแปรแบบ Dynamic Typing
+x = 10
+x = "ten"     # เปลี่ยนชนิดได้ตลอด
+print(x, type(x))
+
+### การรับ-ส่งข้อมูล (I/O) + การแปลงชนิด (Casting)
+year_birth = int(input("พ.ศ.เกิดของคุณ: "))
+age = 2025 - (year_birth - 543)
+print(f"คุณอายุ {age} ปี")
+
+### Operators & Control Flow
+
+#### ตัวอย่าง Arithmetic / Logical
+7 ** 2  # ยกกำลัง (ผล 49)
+7 // 2  # ปัดเศษลง (ผล 3)
+7 % 2   # หารเอาเศษ (ผล 1)
+a and b # and ทั้งคู่
+
+#### if / elif / else
+score = int(input("คะแนน: "))
+if score >= 80:
+    grade = "A"
+elif score >= 70:
+    grade = "B"
+else:
+    grade = "C หรือ ต่ำกว่า"
+print("เกรด =", grade)
+
+#### ลูป for / while
+for fruit in ["mango", "banana"]:
+    print(fruit.upper())
+
+n = 3
+while n:
+    print("นับถอยหลัง", n)
+    n -= 1
+
+#### Break / Continue & Range
+for i in range(10):
+    if i == 5:
+        break
+    if i % 2 == 0:
+        continue
+    print(i)
+
+### โครงสร้าง List เบื้องต้น
+nums = [1, 2, 3, 4]
+print(nums[0], nums[-1])
+nums[2] = 99
+nums.append(5)
+print(nums[1:4])
+
+List มีเมธอดเช่น .insert(), .remove(), .sort(), .append()
+
+---
+
+## Mini Challenge – BMI Calculator
+
+### โจทย์
+1. รับส่วนสูง (ซม.) และน้ำหนัก (กก.) จากคีย์บอร์ด
+2. คำนวณค่า BMI = kg / (m²)
+3. พิมพ์ "ต่ำกว่าเกณฑ์ / ปกติ / น้ำหนักเกิน" ตามค่าที่ได้
+
+### ตัวอย่างโค้ด
+height_cm = float(input("กรุณาใส่ส่วนสูง (ซม.): "))
+weight = float(input("กรุณาใส่น้ำหนัก (กก.): "))
+
+height_m = height_cm / 100
+bmi = weight / (height_m ** 2)
+
+print(f"\nค่า BMI ของคุณ: {bmi:.2f}")
+
+if bmi < 18.5:
+    print("ผลลัพธ์: ต่ำกว่าเกณฑ์ (Underweight)")
+elif bmi < 25:
+    print("ผลลัพธ์: ปกติ (Normal weight)")
+else:
+    print("ผลลัพธ์: น้ำหนักเกิน (Overweight)")
+
+---
+
+## Debugging เบื้องต้น
+
+### ตัวอย่าง Error
+my_list = [1, 2, 3]
+print(my_list[3])  # IndexError!
+
+### วิธีป้องกัน
+if 0 <= index < len(my_list):
+    print(my_list[index])
+else:
+    print(f"Error: ไม่มีค่าในตำแหน่ง index {index}")
+
+หรือใช้ try/except:
+try:
+    print(my_list[index])
+except IndexError:
+    print(f"Error: index {index} อยู่นอกขอบเขต")
+
+---
+
+## สรุปวันนี้
+ชนิดข้อมูล, ตัวแปร, I/O, operator, control-flow (if/else, loop), list
+
+---
+
+## การบ้าน
+1. ขยาย BMI Calculator ให้บันทึกข้อมูลลง list แล้ววนพิมพ์สรุปคน 5 คน
+2. อ่านบท Numbers และ Strings ใน docs.python.org
+
+---
+
+## แหล่งเรียนรู้เพิ่มเติม
+- Python Docs: https://docs.python.org/
+- RealPython: https://realpython.com/
+- W3 Schools: https://www.w3schools.com/python/
+
+---
+
+## Q&A
+สอบถามปัญหา หรือข้อสงสัยเพิ่มเติมในกลุ่มเรียน หรือในห้องได้ตลอด
+
+หมายเหตุ:  
+- ไฟล์นี้ออกแบบให้เน้นเนื้อหาหลัก + โค้ดตัวอย่างที่รันได้จริง  
+- สามารถ copy/paste ใส่ VS Code, Colab, หรือ Markdown Viewer ได้เลย  
+- ปรับแต่งเพิ่มได้ตามสไตล์ผู้สอน
+
+===============================================================================
+
+# Custom AI with RAG – Week 2
+
+## สาระสำคัญ: Python Data Structure & Function
+
+### เป้าหมายการเรียนรู้
+- เข้าใจพื้นฐาน list, tuple, dict, set
+- สร้างและใช้งาน function (def, *args, **kwargs, lambda)
+- ฝึกแนวคิด DRY (Don't Repeat Yourself)
+- เตรียมพื้นฐานสำหรับ Numpy, Pandas, Embedding
+
+---
+
+## สรุปหัวข้อ
+
+### 1. Python Data Structure (Collection)
+
+| ชนิด   | ลักษณะเด่น       | ตัวอย่างการใช้         | หมายเหตุ                |
+|--------|------------------|-----------------------|-------------------------|
+| list   | ปรับแต่งได้, มีลำดับ, ซ้ำได้ | [1,2,3], ["a","b"]     | ใช้งานทั่วไป เช่น ตะกร้าสินค้า |
+| tuple  | แก้ไม่ได้, มีลำดับ | (13.77, 100.51)       | ใช้เก็บค่าคงที่ เช่น พิกัด, ใช้เป็น key ใน dict |
+| dict   | key → value, lookup เร็ว | {"name": "Uncle"}       | เหมาะกับ config, JSON, profile |
+| set    | ไม่เรียงลำดับ, ไม่ซ้ำ, เร็ว | {1,2,3}                 | คัดลอกข้อมูล, ตรวจซ้ำ, เวกเตอร์ทางคณิตศาสตร์ |
+
+#### คุณสมบัติแต่ละชนิด
+|            | list | tuple | dict           | set          |
+|------------|------|-------|----------------|--------------|
+| เปลี่ยนค่าได้ | ✅   | ❌    | ✅ (value)     | ✅ (add/remove) |
+| มีลำดับ      | ✅   | ✅    | ❌             | ❌           |
+| ซ้ำได้        | ✅   | ✅    | key-❌, value-✅ | ❌           |
+
+---
+
+### 2. Big-O Notation (เข้าใจง่าย)
+| ระดับ    | ตัวอย่างจริง            | Python Code      | คำอธิบาย              |
+|----------|------------------------|------------------|------------------------|
+| O(1)     | หยิบของจากลิ้นชัก      | x = nums[0]      | เร็วเสมอ ไม่ว่ากี่ชิ้น  |
+| O(log n) | หาเล่มในห้องสมุดใหญ่   | while ... (binary search) | แบ่งครึ่งทุกรอบ        |
+| O(n)     | อ่านหนังสือทีละเล่ม    | for x in nums    | เวลาขึ้นกับขนาดข้อมูล   |
+| O(n^2)   | จับมือกันทุกคู่ในกลุ่ม | for a in nums: for b in nums | สองลูปซ้อน เวลาขึ้นยกกำลังสอง |
+| O(2^n)   | ทดลองทุกกรณี            | def f(n): ...    | เวลาพุ่งกระฉูด (recursive) |
+
+---
+
+### 3. เจาะลึก list / tuple / dict / set
+
+#### List (ปรับแต่งได้)
+pets = ["cat", "dog", "parrot"]
+pets.append("rabbit")        # ต่อท้าย
+pets.insert(1, "hamster")    # แทรก
+last = pets.pop()            # ดึงค่าท้ายออก
+upper = [p.upper() for p in pets]  # comprehension
+
+- index เริ่มที่ 0
+- รองรับข้อมูลผสมหลายชนิด
+
+#### Tuple (immutable, lightweight)
+rgb = (255, 0, 128)
+r, g, b = rgb  # unpacking
+# เปลี่ยนค่าไม่ได้ (TypeError)
+
+- ใช้กับข้อมูลที่ไม่ควรเปลี่ยน เช่น (x, y), วันเดือนปี
+
+#### Dict (key-value, lookup O(1))
+profile = {"name": "Ohm", "skills": ["Python", "Prompt Eng"]}
+profile["city"] = "Bangkok"  # เพิ่ม/แก้ไข
+age = profile.get("age", "ยังไม่ระบุ")  # อ่านแบบปลอดภัย
+profile.setdefault("hobbies", [])
+profile["hobbies"].append("coding")
+
+for k, v in profile.items():
+    print(k, "=>", v)
+
+# Comprehension: {k: v for k, v in profile.items() if len(str(v)) > 3}
+
+#### Set (unique, unordered)
+a = {1, 2, 3, 4}
+b = {3, 4, 5}
+print(a & b)   # intersection
+print(a | b)   # union
+
+- ใช้กำจัดซ้ำจาก list: unique = set(mylist)
+
+---
+
+### 4. Function (def)
+
+#### รูปแบบมาตรฐาน + Type Hint + Docstring
+def greet(name: str = "world") -> None:
+    """ส่งคำทักทาย"""
+    print(f"Hello, {name}!")
+
+- annotation ช่วยให้ IDE ตรวจชนิด
+- docstring เพื่ออธิบาย
+
+#### *args, **kwargs
+def avg(*nums: float) -> float:
+    return sum(nums) / len(nums)
+
+def save(**fields):
+    print("บันทึก:", fields)
+
+data = {"name": "Om", "age": 27}
+save(**data)  # packing-unpacking
+
+- *args รับค่าหลายตัวแบบ tuple
+- **kwargs รับชื่อ=ค่า ไม่จำกัดแบบ dict
+
+#### Lambda & Higher-order Function
+square = lambda x: x**2
+result = list(map(square, range(5)))  # [0,1,4,9,16]
+# filter, reduce ก็ได้
+
+- นิยมใช้ list comprehension มากกว่า map + lambda ในงานทั่วไป
+
+---
+
+## Mini-Challenge
+
+### 1. รับ list คำ คืน dict {คำ: ความถี่}
+def word_freq(words):
+    result = {}
+    for word in words:
+        word = word.lower()
+        result[word] = result.get(word, 0) + 1
+    return result
+
+print(word_freq(["Cat", "dog", "cat"]))  # {'cat': 2, 'dog': 1}
+
+### 2. ฟังก์ชัน c_to_f(list_c): Celsius → Fahrenheit
+def c_to_f(c_list):
+    return [(c * 9 / 5) + 32 for c in c_list]
+
+print(c_to_f([0, 25, 100]))  # [32.0, 77.0, 212.0]
+
+### 3. list ตัวเลขสุ่ม 0-100 จำนวน 100 ค่า → หาค่าไม่ซ้ำกี่ตัว
+import random
+numbers = [random.randint(0, 100) for _ in range(100)]
+unique = set(numbers)
+print("จำนวนที่ไม่ซ้ำ:", len(unique))
+
+### 4. is_prime(n) เช็กจำนวนเฉพาะ + ใช้ใน loop แสดง prime 2-50
+def is_prime(n):
+    if n < 2: return False
+    for i in range(2, int(n**0.5)+1):
+        if n % i == 0: return False
+    return True
+
+prime_list = [i for i in range(2, 51) if is_prime(i)]
+print("จำนวนเฉพาะ 2-50:", prime_list)
+
+---
+
+## การบ้าน (Homework)
+
+### 1. Word Frequency Tool
+- รับ string ยาวจาก input()
+- คืน dict คำ:ความถี่ (ไม่สนตัวเล็ก-ใหญ่)
+- เรียงมาก → น้อย แล้วพิมพ์ออก
+
+ตัวอย่าง:
+def word_frequency_tool():
+    text = input("Enter your text: ").lower()
+    words = text.split()
+    freq = {}
+    for w in words:
+        freq[w] = freq.get(w, 0) + 1
+    
+    sorted_freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)
+    print("Word frequency (มาก -> น้อย):")
+    for word, count in sorted_freq:
+        print(f"{word}: {count}")
+
+word_frequency_tool()
+
+### 2. Contact Book
+- ใช้ dict เก็บเบอร์โทร (name → phone)
+- ทำเมนูเล็ก ๆ: (A)dd, (S)earch, (Q)uit
+- ทวน loop + function + dict
+
+ตัวอย่าง:
+def show_menu():
+    print("\n==== Contact Book Menu ====")
+    print("(A)dd contact")
+    print("(S)earch contact")
+    print("(Q)uit")
+
+def add_contact(contacts):
+    name = input("Name: ").strip()
+    phone = input("Phone: ").strip()
+    contacts[name] = phone
+    print(f"Added {name}: {phone}")
+
+def search_contact(contacts):
+    name = input("Search name: ").strip()
+    if name in contacts:
+        print(f"{name}'s phone: {contacts[name]}")
+    else:
+        print(f"{name} not found.")
+
+def contact_book():
+    contacts = {}
+    while True:
+        show_menu()
+        choice = input("Choose (A/S/Q): ").strip().upper()
+        if choice == "A":
+            add_contact(contacts)
+        elif choice == "S":
+            search_contact(contacts)
+        elif choice == "Q":
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid choice.")
+
+contact_book()
+
+### 3. อ่าน docs:
+- Data Structures Python Docs: https://docs.python.org/3/tutorial/datastructures.html
+- (เน้น list/dict comprehension)
+
+---
+
+## สรุป
+- เข้าใจพื้นฐาน list, tuple, dict, set
+- ใช้งาน function (*args, **kwargs, lambda)
+- ประยุกต์ใช้ collection ได้เหมาะสม
+- พร้อมต่อยอดไป Numpy/Pandas & Embedding
+
+หมายเหตุ:  
+- ปรับแต่ง style, example เพิ่มเองได้  
+- ใส่เนื้อหาใหม่เพิ่มหรือลบได้อิสระ  
+- ไฟล์นี้เขียนสำหรับ markdown viewer หรือ VS Code โดยตรง
+
+ถ้าต้องการสรุปแนวอื่น หรือแทรกโค้ดแนวลึก-ง่าย แจ้งได้เลย!
+
+===============================================================================
+
+# Custom AI with RAG – Week 3
+
+## สาระสำคัญ: VectorDB, CLI, Python Environment, Files & Modules
+
+### เป้าหมายการเรียนรู้
+- เปรียบเทียบ Vector Database ยอดนิยม
+- ใช้งานคำสั่ง CLI ที่จำเป็น (ทั้ง macOS/Linux และ Windows)
+- ติดตั้ง Python 3.12+ และสร้าง virtual environment (venv)
+- โครงสร้างไฟล์และโมดูลในโปรเจกต์ Python
+- เข้าใจ pip, requirements.txt
+
+---
+
+## 1. เปรียบเทียบ Vector Database 5 เจ้ายอดนิยม
+
+| ชื่อ         | จุดเด่น                     | ข้อควรระวัง / ข้อจำกัด             | เหมาะกับ...                       |
+|--------------|-----------------------------|-------------------------------------|------------------------------------|
+| Pinecone     | Managed, serverless, Hybrid keyword+semantic, index อัพเดตเร็ว | Proprietary SaaS, on-cloud only     | ใช้งานทันที, มี SLA               |
+| Milvus       | Open-source, scale ใหญ่, GPU indexing | ต้องดูแลคลัสเตอร์, จูนระบบเอง       | งาน production ใหญ่, community ใหญ่ |
+| Qdrant       | Rust-based, latency ต่ำ, hybrid query (BM25+dense), cloud ถูก | Dynamic sharding ยังไม่สมบูรณ์       | PoC/Production ขนาดกลาง-ใหญ่      |
+| Chroma       | Python/TS, pip install, plug&play กับ LangChain, LlamaIndex | Latency สูงถ้างานหนัก, scale ใหญ่ยาก | RAG ขนาดเล็ก-กลาง, local dev      |
+| pgvector     | ทำ Postgres เป็น VectorDB, ได้ ACID, JOIN ฟรี | ดูแล Postgres เอง, ไม่มี hybrid BM25 | มี Postgres อยู่แล้ว, ลด infra     |
+
+สรุปการเลือก
+- เน้น "เสียบใช้ทันที" เลือก Pinecone
+- อยากได้ Open-source & scale ใหญ่ เลือก Milvus
+- Filtering ยืดหยุ่น & ถูกกว่า cloud เลือก Qdrant
+- Hackathon/local PoC เลือก Chroma
+- มี Postgres เดิม เลือก pgvector
+
+---
+
+## 2. ติดตั้ง Python 3.12+ บนทุก OS
+
+### macOS (Intel/Apple Silicon)
+# ติดตั้ง Homebrew (ถ้ายังไม่มี)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# ติดตั้ง Python 3.12
+brew install python@3.12
+
+# ให้ shell มองเห็น Python version นี้
+echo 'export PATH="/opt/homebrew/opt/python@3.12/bin:$PATH"' >> ~/.zprofile
+source ~/.zprofile
+
+# ตรวจสอบ
+python3 --version
+
+### Windows
+# ติดตั้งผ่าน winget
+winget install --id Python.Python.3.12 -e
+
+# หรือใช้ Chocolatey
+choco install python --version=3.12.4
+
+# ตรวจสอบ
+python --version
+
+### Linux (Debian/Ubuntu 24+)
+sudo apt update
+sudo apt install python3.12 python3.12-venv python3.12-dev
+
+# ถ้าไม่มีใน apt ต้อง compile เองจาก python.org
+
+---
+
+## 3. สร้าง Virtual Environment (venv)
+
+### สร้าง venv ในโฟลเดอร์โปรเจกต์
+# macOS / Linux
+python3 -m venv venv
+
+# Windows
+python -m venv venv
+
+### เปิดใช้งาน venv
+# macOS / Linux
+source venv/bin/activate
+
+# Windows (PowerShell)
+.\venv\Scripts\Activate.ps1
+
+# Windows (CMD)
+venv\Scripts\activate.bat
+
+### อัปเกรด pip
+python -m pip install --upgrade pip
+
+### ติดตั้งไลบรารี
+pip install pandas langchain
+
+### เลิกใช้งาน venv
+deactivate
+
+---
+
+## 4. คำสั่ง CLI พื้นฐาน (macOS/Linux & Windows)
+
+| ฟังก์ชัน | macOS/Linux (bash/zsh) | Windows (PowerShell / CMD) | ใช้ทำอะไร |
+|----------|------------------------|---------------------------|-----------|
+| ดูตำแหน่งปัจจุบัน | pwd | pwd | บอก path ปัจจุบัน |
+| ย้ายโฟลเดอร์ | cd projects/ai, cd .. | cd projects\ai, cd .. | Change Directory |
+| ดูรายการไฟล์ | ls -al | dir | ดูไฟล์/โฟลเดอร์ทั้งหมด |
+| สร้างโฟลเดอร์ | mkdir data | mkdir data | Make Directory |
+| ลบไฟล์/โฟลเดอร์ | rm notes.txt, rm -r old/ | Remove-Item notes.txt, Remove-Item -Recurse old\ | rm -r ลบทั้งโฟลเดอร์ |
+| คัดลอก | cp src/main.py backup/ | Copy-Item src\main.py backup\ | Copy |
+| ย้าย/เปลี่ยนชื่อ | mv report.csv ../archive/ | Move-Item report.csv ..\archive\ | Move/Rename |
+| สร้างไฟล์เปล่า | touch README.md | New-Item README.md -ItemType File หรือ type nul > README.md | สร้างไฟล์ว่าง |
+| เปิด VS Code | code . | code . | เปิด VS Code ในโฟลเดอร์นี้ |
+| ติดตั้งไลบรารี Python | pip install pandas | pip install pandas | ดึงแพ็คเกจจาก PyPI |
+
+---
+
+## 5. เข้าใจความแตกต่างของ Shell
+
+| จุดเด่น | bash/zsh (macOS-Linux) | PowerShell (Windows & Linux) | CMD (Windows legacy) |
+|---------|------------------------|------------------------------|----------------------|
+| ส่งค่าระหว่างคำสั่ง | ส่งเป็น string | ส่งเป็น .NET object | ส่งเป็น string |
+| ไฟล์ script | .sh / .zsh | .ps1 | .bat / .cmd |
+| ตัวแปร | $HOME, $PATH | $Env:HOME, $profile | %USERPROFILE%, %PATH% |
+| pipeline | cat file | grep "foo" | Get-Process | Where-Object Name -eq "notepad" | dir | find "txt" |
+| Cross-platform | ดีมาก | PowerShell Core cross-platform | Windows เท่านั้น |
+
+---
+
+## 6. โครงสร้างโปรเจกต์ Python & Files/Modules
+
+### ตัวอย่างโครงสร้างโปรเจกต์
+my_project/
+  ├── main.py
+  ├── data/
+  │    └── input.txt
+  ├── utils/
+  │    ├── __init__.py
+  │    └── helper.py
+  ├── requirements.txt
+  └── venv/
+
+- main.py = script หลัก
+- data/ = โฟลเดอร์สำหรับไฟล์ข้อมูล
+- utils/ = เก็บโมดูลเสริม/utility ต่าง ๆ
+- requirements.txt = รายการไลบรารีที่ต้องใช้ (สร้างด้วย pip freeze > requirements.txt)
+
+### ตัวอย่าง import ข้ามไฟล์
+# ใน main.py
+from utils.helper import some_function
+
+---
+
+## 7. Practice & Mini Challenge
+
+1. สร้าง venv ในโปรเจกต์ใหม่
+2. ติดตั้ง pandas & langchain ใน venv
+3. สร้าง requirements.txt
+4. ทดลอง import ไฟล์ cross module
+5. ใช้ CLI commands ที่เรียนไปจริงใน OS ของตัวเอง
+
+---
+
+## 8. การบ้าน
+
+1. ลองติดตั้ง Python 3.12+ และตั้งค่า venv ด้วยตัวเอง
+2. สร้างโครงสร้างโปรเจกต์ตามตัวอย่าง (มี requirements.txt, venv, data/, utils/)
+3. ฝึกใช้ CLI commands ทุกคำสั่งอย่างน้อย 1 ครั้งในเครื่องตัวเอง
+4. ศึกษาเพิ่มเติมเรื่อง Python Packaging & Module
+
+---
+
+## สรุป
+
+- เปรียบเทียบ VectorDB ชั้นนำ เลือกให้เหมาะกับงาน
+- สร้างและใช้งาน venv, เข้าใจ pip/requirements.txt
+- ใช้คำสั่ง CLI ได้คล่องทั้ง Windows, macOS, Linux
+- จัดโครงสร้างไฟล์และโมดูลแบบมืออาชีพ
+
+> ปรับแต่ง เพิ่มเติม หรือขอฉบับย่อย/ฉบับยาวกว่านี้ได้เสมอ!  
+> เนื้อหานี้ยึดตาม week 3 ต้นฉบับ เหมาะกับผู้เริ่มต้นและเน้น practical จริง  
+> ถ้ามีคำถามหรืออยากได้ส่วนไหนละเอียดขึ้น แจ้งได้เลย!
+
+===============================================================================
+
+# Custom AI with RAG – Week 4
+
+## สาระสำคัญ: NLP เบื้องต้น & Prompt Engineering
+
+### เป้าหมายการเรียนรู้
+- เข้าใจพื้นฐาน NLP (Natural Language Processing)
+- รู้จักการประยุกต์ใช้ Prompt Engineering
+- ทดลองใช้ LLM Chatbot & แนวคิด Embedding
+
+---
+
+## 1. โครงสร้างหลักสูตร
+
+| หัวข้อ              | สิ่งที่จะได้ทำ Hands-on |
+|---------------------|-------------------------|
+| Python Basics       | Run, I/O, ตัวแปร, control-flow |
+| Data Structures     | list/tuple/dict/set, สร้าง function |
+| Files & Modules     | อ่าน-เขียนไฟล์, import, pip |
+| NLP พื้นฐาน     | Tokenization, cleaning |
+| Embedding Models    | สร้าง sentence embedding |
+| LLMs & Ollama       | ดึง LLMs มาลองในเครื่อง |
+| VectorDB (pgvector) | ติดตั้ง PostgreSQL+pgvector |
+| Import → VectorDB   | สร้าง embedding & insert |
+| Workshop RAG Chatbot| ตอบ FAQ ร้านค้า |
+| Workshop Deploy     | FastAPI + Docker + LINE OA hook |
+
+---
+
+## 2. พื้นฐาน NLP (Natural Language Processing)
+
+NLP = เทคโนโลยีที่ช่วยให้คอมพิวเตอร์ "เข้าใจ" และ "ใช้" ภาษามนุษย์ได้เหมือนคน  
+ตัวอย่างเช่น ChatGPT, Google Assistant, ระบบแปลภาษา ฯลฯ
+
+### ความท้าทาย
+- ภาษา = ความซับซ้อน บริบท คำแฝงอารมณ์/วัฒนธรรม  
+- ภาษาไทยกับอังกฤษไม่เหมือนกัน (ไวยากรณ์, คำ, ความหมาย)
+
+### ตัวอย่างแอป NLP ในชีวิตประจำวัน
+- Google Translate
+- Content Recommendation (Tiktok, FB, IG)
+- Chatbot (ChatGPT, Claude, Gemini, Grok ฯลฯ)
+
+---
+
+## 3. Prompt Engineering 101
+
+### Prompt คืออะไร?
+> การออกแบบ "คำสั่ง" หรือ "คำถาม" ที่ส่งให้ LLM (AI Model)  
+> เพื่อให้ได้ผลลัพธ์ตามที่ต้องการ
+
+### หลักการเขียน Prompt ที่ดี
+- Specific and Clear Instruction: ชัดเจน, ไม่คลุมเครือ
+- Use Delimiters: ใช้เครื่องหมายเช่น ``` เพื่อกัน text
+- Specify Output Format: กำหนดรูปแบบเอาต์พุต (เช่น JSON, ตาราง)
+- Few-shot Prompting: ให้ตัวอย่าง (example) เพื่อให้โมเดลเข้าใจ pattern
+- Chain-of-Thought Prompting: ให้ AI คิดเป็นขั้นตอน
+
+### ตัวอย่างเทคนิค
+- Structure Prompting: ขอให้ออกมาเป็น "ตาราง" หรือ "ลิสต์"
+- Role Prompting: สวมบทบาท เช่น "คุณเป็นครูอธิบาย..."
+- Rule Embedding: กำหนด "ห้ามใช้คำหยาบ" "ไม่เกิน 100 คำ"
+- Emotion Prompting: ขอให้ AI ตอบด้วยอารมณ์ "ให้กำลังใจ"
+
+#### ตัวอย่างการใช้งาน
+Structure:  
+> สรุปข่าวนี้ในตาราง 3 คอลัมน์: หัวข้อ, สรุปสั้น, ตัวอย่าง
+
+Role:  
+> คุณเป็นนักประวัติศาสตร์ เล่าเหตุการณ์ WW2 แบบเข้าใจง่าย
+
+Rule:  
+> อธิบายโรค Covid-19 โดยห้ามใช้ศัพท์ทางการแพทย์  
+> อธิบายหลักการทำงานของเครื่องยนต์ "ไม่เกิน 4 ประโยค"
+
+Emotion:  
+> ตอบคำถามนี้ด้วยน้ำเสียงให้กำลังใจและเป็นมิตร
+
+---
+
+## 4. NLP Model 3 ประเภทหลัก
+
+### 1. Classification Model
+- รับข้อความ → ให้ label (เช่น sentiment analysis)
+- เช่น รีวิว = positive/neutral/negative
+
+### 2. Sequence Tagging Model
+- ติด label ให้แต่ละคำในข้อความ (Named Entity Recognition, POS tagging)
+- เช่น "iPad ที่ CTW" → iPad: PRODUCT, CTW: LOCATION
+
+### 3. Sequence-to-Sequence Model
+- แปลงข้อความเป็นข้อความใหม่ (Machine Translation, Summarization)
+- เช่น แปลภาษา, สรุปเนื้อหา
+
+---
+
+## 5. หลักการฝึกสอน AI (ML Paradigm)
+
+- Supervised Learning: สอนจากข้อมูลที่มี label
+- Unsupervised Learning: ค้นหารูปแบบเอง ไม่มี label
+- Transfer Learning: ฝึกด้วยข้อมูลขนาดใหญ่ แล้วปรับจูนกับงานเฉพาะ
+
+---
+
+## 6. Embedding & Representation
+
+- One-hot Vector: การแทนคำแบบดั้งเดิม (ไม่มีความสัมพันธ์)
+- Word Context Matrix: แทนคำด้วยความถี่การเกิดร่วม (co-occurrence)
+- Dense Vector (Word Embedding): เช่น Word2Vec, แทนคำด้วยเวกเตอร์ขนาดเล็กที่ encode ความหมาย
+
+# ตัวอย่างการใช้ Embedding model (pseudocode)
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('all-MiniLM-L6-v2')
+vec = model.encode("สวัสดีค่ะ")
+print(vec.shape)  # (384,)
+
+การวัดความคล้าย: ใช้ Cosine Similarity วัดความใกล้ของเวกเตอร์
+
+---
+
+## 7. Activities – ลองเขียน Prompt (5 นาที)
+
+1. เขียน prompt 2 แบบ (ธรรมดา vs. แบบใช้เทคนิคข้างต้น)
+2. เปรียบเทียบ output ที่ได้จาก LLM (ChatGPT, Claude, Gemini ฯลฯ)
+
+---
+
+## 8. ทดลองใช้ LLM/Chatbot
+
+- ChatGPT: https://chatgpt.com
+- Gemini: https://aistudio.google.com/prompts/new_chat
+- Claude: https://claude.ai/
+- Grok: https://grok.com/
+- OpenThaiGPT: https://openrouter.ai/
+
+---
+
+## 9. สรุป
+
+- เข้าใจ NLP, Prompt Engineering, Embedding
+- พร้อมเริ่มต้นใช้งานและประยุกต์ LLM ในโปรเจกต์จริง
+- ฝึกเขียน prompt ให้ตอบโจทย์ธุรกิจและชีวิตจริง
+
+---
+
+## 10. การบ้าน
+
+1. ทดลองเล่น Chatbot อย่างน้อย 2 ตัว (ภาษาไทย/อังกฤษ)
+2. ฝึกเขียน prompt ตามเทคนิค Structure/Role/Rule/Emotion
+3. ศึกษาเพิ่มเติมเรื่อง Embedding/Vector Space/Cosine Similarity
+
+---
+
+## แหล่งเรียนรู้เพิ่มเติม
+
+- docs.python.org/3/tutorial: https://docs.python.org/3/tutorial
+- realpython.com: https://realpython.com
+- w3schools.com/python: https://w3schools.com/python
+- Prompt Engineering Guide: https://www.promptingguide.ai/
+
+> สามารถนำ markdown นี้ไปแจกผู้เรียน, ใส่ระบบ LMS หรืออัปโหลดลง GitHub ได้ทันที  
+> เนื้อหาเหมาะกับผู้เริ่มต้นและ intermediate ที่อยากเข้าใจ NLP+Prompt  
+> ขอฉบับเจาะจุดไหนลึกขึ้นหรือเพิ่มตัวอย่าง code/รูปแบบอื่นๆ แจ้งได้เลย!
+
+===============================================================================
+
+# Custom AI with RAG – Week 5
+
+## สาระสำคัญ: เข้าใจ Transformer & Retrieval-Augmented Generation (RAG) เบื้องต้น
+
+### เป้าหมายการเรียนรู้
+- เข้าใจหลักการของ Transformer (หัวใจของ LLM ยุคใหม่)
+- เข้าใจแนวคิด RAG (Retrieval-Augmented Generation)
+- เห็นตัวอย่างงานจริง & ข้อดี-ข้อจำกัด
+- ปูพื้นฐานสำหรับการทำ RAG Chatbot
+
+---
+
+## 1. ทบทวน NLP และ Prompt Engineering (จาก week 4)
+- NLP = เทคโนโลยีให้คอมฯ เข้าใจ/ใช้ภาษาคน (เช่น ChatGPT, แปลภาษา, Q&A)
+- ตัวอย่าง NLP: Google Translate, Content Recommendation, Search, Chatbot
+- Prompt Engineering = ออกแบบคำสั่ง/คำถามให้ LLM ตอบตรงจุด
+- เทคนิค: Structure Prompting, Role Prompting, Rule Embedding, Emotion Prompting
+
+---
+
+## 2. Transformer: หัวใจของ AI ยุคใหม่
+
+### ทำไม Transformer ถึงสำคัญ?
+- โมเดล AI ที่ "ประสบความสำเร็จสูงสุด" ในยุคนี้ (GPT, BERT ฯลฯ)
+- ใช้งานทั้งด้านภาษา, ภาพ, เสียง, โค้ด ฯลฯ
+
+### ความสามารถหลัก
+- Encyclopedic Knowledge: จำข้อเท็จจริงโลกได้จำนวนมาก
+- Linguistic Knowledge: เข้าใจภาษา, ไวยากรณ์, ความหมายในบริบทกว้าง
+
+### โครงสร้างพื้นฐาน: Transformer Block
+- จุดเด่น = Self-Attention
+- Positional Encoding: ทำให้เข้าใจ "ลำดับ" คำในประโยค
+
+#### QKV (Query, Key, Value)
+- Query: เวกเตอร์คำถาม ("ฉันต้องสนใจคำไหนบ้าง?")
+- Key: เวกเตอร์บอกข้อมูลแต่ละคำ
+- Value: เวกเตอร์ความหมายแต่ละคำ
+
+#### หลักการ Attention (เข้าใจง่าย)
+1. เอา Query ของแต่ละคำ ไปเทียบ Key ทุกคำในประโยค
+2. ได้คะแนน (Similarity Score) → เอาไป Softmax เป็น Attention Weights
+3. ใช้ Weights นี้เฉลี่ย (weighted average) กับ Value ทุกคำ
+4. ได้ Contextualized Embedding ที่ "เข้าใจบริบท" แล้ว
+
+#### Multi-Head Attention & Positional Encoding
+- ใช้หลาย "หัว" เรียนรู้ pattern ต่างกัน
+- Positional Encoding ทำให้เข้าใจตำแหน่งคำ
+
+#### อ่านเพิ่ม:  
+- Attention Is All You Need (2017): https://arxiv.org/abs/1706.03762
+
+---
+
+## 3. กระบวนการสร้าง LLM สมัยใหม่
+
+### Pre-training
+- ฝึกกับข้อมูลข้อความขนาดใหญ่มาก (Unsupervised)
+- เรียนรู้ภาษาและข้อเท็จจริงพื้นฐาน
+
+### Fine-tuning
+- ปรับโมเดลกับข้อมูลป้ายกำกับเล็กๆ เฉพาะ domain งาน
+
+---
+
+## 4. เข้าใจ RAG (Retrieval-Augmented Generation)
+
+### หลักการ RAG System
+1. User Query: ผู้ใช้พิมพ์คำถาม
+2. Retrieve Documents: ระบบค้นหาเอกสาร "เกี่ยวข้อง" จากฐานข้อมูล (Knowledge Base)
+    - ฐานข้อมูลถูกแบ่งเป็น "Chunk" (เช่น 1 ย่อหน้า/200 tokens)
+3. Prompt Re-writer/Context Augmentation: รวมเอกสารที่ค้นเจอเข้า prompt
+4. LLM Generation: ส่ง prompt+context ให้ LLM ตอบ
+5. Citation: (ถ้ามี) LLM อ้างอิงที่มาให้ user
+
+### วิธีการ Retrieve
+- Sparse Retrieval: ใช้ keyword matching (เช่น BM25)
+- Dense Retrieval: ใช้ embedding (vector similarity; semantic search)
+- Hybrid: รวม 2 แบบข้างบน
+
+### ข้อดีของ RAG
+- ดึงข้อมูล "ล่าสุด" หรือ "เฉพาะทาง" เสริมให้ LLM โดยไม่ต้อง fine-tune โมเดลใหญ่
+- ลด Hallucination (ตอบผิด) เพราะมี reference จริง
+- ควบคุมขอบเขตเนื้อหาได้ (Closed-domain QA)
+- อัปเดตฐานข้อมูลความรู้ได้ตลอดเวลา (ไม่ต้อง retrain โมเดล)
+
+### ข้อจำกัดของ RAG
+- Context Window Limit: LLM ใส่ context ได้จำกัด (ต้องเลือก chunk ที่สำคัญ)
+- การ retrieve ไม่แม่น = ตอบไม่แม่น
+- มี latency (ต้องค้นก่อน generate)
+- มีค่าใช้จ่าย token กับ LLM/API
+
+---
+
+## 5. ตัวอย่าง RAG ในงานจริง
+
+- Internal FAQ Chatbot: chatbot สำหรับองค์กร ดึง policy, เอกสาร, กฎหมาย ฯลฯ
+- Product Knowledge Bot: ดึง manual, spec, วิธีใช้
+- Legal/Contract Q&A: ตอบคำถามจากเอกสารสัญญา กฎหมาย ฯลฯ
+
+---
+
+## 6. ปูพื้นฐานสู่ Workshop
+
+- เข้าใจแนวคิด Chunking, Embedding, VectorDB (จะลงมือสัปดาห์ถัดไป)
+- รู้จักความต่างของ Retrieval แบบ keyword vs. semantic
+- ตระหนักถึงจุดแข็ง/อ่อนของ RAG ในโลกจริง
+
+---
+
+## 7. สรุป
+
+- Transformer = โมเดลแกนหลักของ LLM
+- RAG = เทคนิคดึง context มา augment โมเดล สร้าง Chatbot ตอบได้แม่นขึ้น
+- พร้อมลงมือใช้ VectorDB + Embedding ในโปรเจกต์จริง
+
+---
+
+## 8. การบ้าน
+
+- ศึกษาเพิ่มเติมเรื่อง Attention/Transformer (ดูวิดีโอ, อ่านบทความ)
+- หาข้อมูลโปรเจกต์ RAG/Chatbot ที่ใช้ในองค์กรจริง
+- ทดลองเล่น RAG chatbot (OpenAI, Google, HuggingFace demo)
+
+---
+
+## แหล่งเรียนรู้เพิ่มเติม
+
+- Attention is All You Need (paper): https://arxiv.org/abs/1706.03762
+- Vector Databases 101: https://www.pinecone.io/learn/vector-database/
+- RAG 101 (HuggingFace): https://huggingface.co/docs/transformers/main/en/tasks/retrieval_augmented_generation
+- docs.python.org/3/tutorial: https://docs.python.org/3/tutorial
